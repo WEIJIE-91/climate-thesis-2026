@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>數位遊戲式學習實驗入口</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --step1-color: #e67e22; 
+            --step2-color: #c0392b; 
+            --step3-color: #27ae60; 
+            --step4-color: #2980b9; 
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        h1 { margin-bottom: 10px; font-size: 2.2rem; color: var(--primary-color); }
+        p.subtitle { font-size: 1.1rem; color: #666; margin-bottom: 40px; line-height: 1.6; }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 600px;
+            padding: 20px 25px;
+            background-color: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+
+        .nav-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 6px;
+        }
+        .step-1::before { background-color: var(--step1-color); }
+        .step-2::before { background-color: var(--step2-color); }
+        .step-3::before { background-color: var(--step3-color); }
+        .step-4::before { background-color: var(--step4-color); }
+
+        .nav-icon { font-size: 2rem; margin-right: 20px; min-width: 50px; text-align: center;}
+        .nav-text { text-align: left; flex: 1; }
+        
+        .step-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            color: white;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .nav-title { font-size: 1.2rem; font-weight: bold; display: block; margin-bottom: 5px; }
+        .nav-desc { font-size: 0.9rem; color: #777; }
+        .arrow { font-size: 1.5rem; font-weight: bold; color: #ccc; }
+
+        footer { margin-top: 40px; font-size: 0.9rem; color: #aaa; border-top: 1px solid #eee; padding-top: 20px;}
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>氣候變遷遊戲式學習實驗</h1>
+        <p class="subtitle">
+            同學你好，感謝參與本研究。<br>
+            請依照 <strong>步驟 1 到 步驟 4</strong> 的順序完成所有任務。
+        </p>
+
+        <div class="button-group">
+            
+            <a href="https://forms.gle/hh6z2wxGw3ygRHpx8" target="_blank" class="nav-card step-1">
+                <div class="nav-icon">📝</div>
+                <div class="nav-text">
+                    <span class="step-badge" style="background-color: var(--step1-color);">Step 1</span>
+                    <span class="nav-title">填寫前測問卷</span>
+                    <span class="nav-desc">請先完成基本資料與前測題目</span>
+                </div>
+                <div class="arrow">➔</div>
+            </a>
+
+            <a href="https://drive.google.com/drive/folders/1P7QykGhozIWyDxR8fLauCsIz7jP1YkAs?usp=sharing" target="_blank" class="nav-card step-2" onclick="if(this.getAttribute('href') === '#') { alert('請告知研究生：遊戲連結尚未設定！'); return false; }">
+                <div class="nav-icon">📥</div>
+                <div class="nav-text">
+                    <span class="step-badge" style="background-color: var(--step2-color);">Step 2</span>
+                    <span class="nav-title">下載並遊玩《稻田之戰》</span>
+		    <span class="nav-title">並根據編號下載對應的檔案!</span>
+                    <span class="nav-desc">下載壓縮檔 -> 解壓縮 -> 執行 Game.exe</span>
+                </div>
+                <div class="arrow">➔</div>
+            </a>
+
+            <a href="game.html" target="_blank" class="nav-card step-3">
+                <div class="nav-icon">🧩</div>
+                <div class="nav-text">
+                    <span class="step-badge" style="background-color: var(--step3-color);">Step 3</span>
+                    <span class="nav-title">進行概念圖學習任務</span>
+                    <span class="nav-desc">整理剛才在遊戲中學到的知識</span>
+                </div>
+                <div class="arrow">➔</div>
+            </a>
+
+            <a href="https://forms.gle/4CVW1JmuQiK7Ss647" target="_blank" class="nav-card step-4">
+                <div class="nav-icon">✅</div>
+                <div class="nav-text">
+                    <span class="step-badge" style="background-color: var(--step4-color);">Step 4</span>
+                    <span class="nav-title">填寫後測問卷</span>
+                    <span class="nav-desc">上傳截圖並回答後測題目</span>
+                </div>
+                <div class="arrow">➔</div>
+            </a>
+
+        </div>
+
+        <footer>
+            實驗流程：前測 ➔ RPG遊戲 ➔ 概念圖 ➔ 後測<br>
+            © 2026 數位學習碩論實驗
+        </footer>
+    </div>
+
+</body>
+</html>

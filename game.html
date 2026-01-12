@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>氣候變遷農業拖曳實驗 - 優化流暢版</title>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --root-bg: #FFF2CC;
+            --root-border: #D6B656;
+            --blue-bg: #DAE8FC;
+            --blue-border: #6C8EBF;
+            --purple-bg: #E1D5E7;
+            --purple-border: #9673A6;
+            --yellow-bg: #FFF2CC;
+            --yellow-border: #D6B656;
+            --header-bg: #D6B656; 
+            --header-text: #000;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        #app-wrapper {
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            max-width: 1500px; 
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 受試者資訊欄 */
+        .student-info-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 15px 20px;
+            background-color: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .info-group { display: flex; align-items: center; gap: 10px; }
+        .info-label { font-weight: bold; font-size: 16px; color: #333; }
+        .info-input {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            font-family: "Microsoft JhengHei", sans-serif;
+            width: 150px;
+        }
+
+        /* 頂部標題列 */
+        .headers-row {
+            display: flex;
+            margin-bottom: 20px;
+            position: relative;
+            padding-left: 20px; 
+            height: 40px;
+        }
+
+        .header-tag {
+            background-color: var(--header-bg);
+            color: var(--header-text);
+            padding: 8px 15px;
+            border: 2px solid #000;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+            position: absolute; 
+            white-space: nowrap;
+            z-index: 5;
+        }
+
+        .content-area { display: flex; width: 100%; }
+
+        /* 左側圖表區 */
+        .diagram-container {
+            flex: 3;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding-right: 20px;
+            border-right: 2px dashed #ccc;
+            position: relative;
+        }
+
+        /* 右側待選區 */
+        .sidebar {
+            flex: 1;
+            padding-left: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .sidebar-title {
+            background-color: #D6B656;
+            color: #000;
+            width: 100%;
+            text-align: center;
+            padding: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border: 2px solid #000;
+        }
+
+        .items-container {
+            width: 100%;
+            min-height: 500px;
+            border: 2px dashed #ccc;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+            background-color: #fafafa;
+            border-radius: 10px;
+        }
+
+        /* 拖曳物件 */
+        .draggable-item {
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid #000;
+            text-align: center;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: grab;
+            width: 90%;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            background: white;
+            transition: transform 0.1s, box-shadow 0.1s;
+            position: relative;
+            z-index: 100; /* 確保拖曳時在最上層 */
+        }
+        
+        .draggable-item:active { cursor: grabbing; transform: scale(0.98); }
+        .item-purple { background-color: var(--purple-bg); border-color: var(--purple-border); }
+        .item-yellow { background-color: var(--yellow-bg); border-color: var(--yellow-border); }
+
+        /* 圖表節點 */
+        .node {
+            padding: 5px 10px;
+            border-radius: 8px;
+            border: 2px solid;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            box-sizing: border-box;
+        }
+        .node.root { background-color: var(--root-bg); border-color: var(--root-border); width: 140px; height: 90px; margin-right: 0; }
+        .node.blue { background-color: var(--blue-bg); border-color: var(--blue-border); width: 160px; height: 50px; }
+
+        /* 放置區 (Slot) */
+        .slot {
+            width: 210px;
+            height: 50px;
+            border-radius: 8px;
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: bold;
+            text-align: center;
+            transition: background-color 0.2s, border-color 0.2s;
+            position: relative;
+        }
+        
+        /* 空格狀態 */
+        .slot.empty { background-color: #fff; border: 2px dashed #aaa; }
+        .slot.empty.purple-zone { border-color: var(--purple-border); width: 140px; background-color: #fcfcfc;}
+        .slot.empty.yellow-zone { border-color: var(--yellow-border); background-color: #fcfcfc;}
+        
+        /* 拖曳經過時的高亮 */
+        .slot.drag-over { background-color: #e0f7fa !important; border-style: solid; transform: scale(1.02); }
+        
+        /* 已填滿狀態 (由 JS 控制背景色) */
+        .slot.filled { border: 2px solid; box-shadow: none; border-style: solid; }
+        /* 預設的黃色填滿 (鷹架) */
+        .slot.filled.static-yellow { background-color: var(--yellow-bg); border-color: var(--yellow-border); }
+
+        /* 讓被放入的物件填滿格子 */
+        .slot .draggable-item {
+            width: 100%; height: 100%; margin: 0; box-shadow: none;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; border: none; background: transparent; cursor: grab;
+        }
+
+        .connector { flex-shrink: 0; display: block; }
+        .column-group { display: flex; flex-direction: column; gap: 40px; }
+        .row-group { display: flex; align-items: center; gap: 0; }
+        .sub-options { display: flex; flex-direction: column; justify-content: space-between; height: 180px; }
+
+        #screenshot-btn {
+            margin-top: 20px;
+            width: 100%;
+            padding: 15px;
+            background-color: #6aa84f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        #screenshot-btn:hover { background-color: #588e40; }
+    </style>
+</head>
+<body>
+
+<div id="app-wrapper">
+    
+    <div class="student-info-row">
+        <div class="info-group">
+            <span class="info-label">編號：</span>
+            <input type="text" class="info-input" placeholder="例：A01">
+        </div>
+        <div class="info-group">
+            <span class="info-label">姓名：</span>
+            <input type="text" class="info-input" placeholder="請輸入姓名">
+        </div>
+        <div style="margin-left: auto; color: #666; font-size: 14px;">
+            ※ 可自由拖曳調整，完成後點擊右下角按鈕下載
+        </div>
+    </div>
+
+    <div class="headers-row">
+        <div class="header-tag" style="left: 60px;">氣候變遷對農業的影響</div>
+        <div class="header-tag" style="left: 420px;">農業永續發展策略</div>
+        <div class="header-tag" style="left: 640px;">農業應對方案</div>
+    </div>
+
+    <div class="content-area">
+        <div class="diagram-container">
+            
+            <div class="node root">氣候變遷對<br>農業的影響</div>
+
+            <svg class="connector" width="50" height="400">
+                <path d="M0 200 L25 200" fill="none" stroke="black" stroke-width="2" />
+                <path d="M25 50 L25 350" fill="none" stroke="black" stroke-width="2" />
+                <path d="M25 50 L50 50" fill="none" stroke="black" stroke-width="2" />
+                <path d="M25 200 L50 200" fill="none" stroke="black" stroke-width="2" />
+                <path d="M25 350 L50 350" fill="none" stroke="black" stroke-width="2" />
+            </svg>
+
+            <div class="column-group">
+                
+                <div class="row-group">
+                    <div class="node blue">水資源供應不穩定</div>
+                    <svg class="connector" width="40" height="20">
+                        <line x1="0" y1="10" x2="35" y2="10" stroke="black" stroke-width="2" />
+                        <polygon points="35,5 40,10 35,15" fill="black" />
+                    </svg>
+                    <div class="slot empty purple-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                    <svg class="connector" width="40" height="180">
+                        <path d="M0 90 L10 90" fill="none" stroke="black" stroke-width="2" />
+                        <path d="M10 25 L10 155" fill="none" stroke="black" stroke-width="2" />
+                        <path d="M10 25 L40 25" fill="none" stroke="black" stroke-width="2" />
+                        <path d="M10 90 L40 90" fill="none" stroke="black" stroke-width="2" />
+                        <path d="M10 155 L40 155" fill="none" stroke="black" stroke-width="2" />
+                    </svg>
+                    <div class="sub-options">
+                        <div class="slot empty yellow-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                        <div class="slot filled static-yellow">透過水庫或雨水收集<br>確保穩定水源</div>
+                        <div class="slot empty yellow-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                    </div>
+                </div>
+
+                <div class="row-group">
+                    <div class="node blue">極端氣候</div>
+                    <svg class="connector" width="40" height="20">
+                        <line x1="0" y1="10" x2="35" y2="10" stroke="black" stroke-width="2" />
+                        <polygon points="35,5 40,10 35,15" fill="black" />
+                    </svg>
+                    <div class="slot empty purple-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                    <svg class="connector" width="40" height="180">
+                        <path d="M0 90 L10 90" fill="none" stroke="black" stroke-width="2" />
+                        <path d="M10 25 L10 155" fill="none" stroke="black" stroke-width="2" />
+                        <path d="M10 25 L40 25" fill="none" stroke="black" stroke-width="2" />
+                        <path d="M10 90 L40 90" fill="none" stroke="black" stroke-width="2" />
+                        <path d="M10 155 L40 155" fill="none" stroke="black" stroke-width="2" />
+                    </svg>
+                    <div class="sub-options">
+                        <div class="slot filled static-yellow">選擇適應氣候變遷<br>的耐旱作物</div>
+                        <div class="slot empty yellow-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                        <div class="slot empty yellow-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                    </div>
+                </div>
+
+                <div class="row-group">
+                    <div class="node blue">農田水質污染</div>
+                    <svg class="connector" width="40" height="20">
+                        <line x1="0" y1="10" x2="35" y2="10" stroke="black" stroke-width="2" />
+                        <polygon points="35,5 40,10 35,15" fill="black" />
+                    </svg>
+                    <div class="slot empty purple-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                    <svg class="connector" width="40" height="180">
+                        <path d="M0 90 L10 90" fill="none" stroke="black" stroke-width="2" />
+                        <path d="M10 25 L10 155" fill="none" stroke="black" stroke-width="2" />
+                        <path d="M10 25 L40 25" fill="none" stroke="black" stroke-width="2" />
+                        <path d="M10 90 L40 90" fill="none" stroke="black" stroke-width="2" />
+                        <path d="M10 155 L40 155" fill="none" stroke="black" stroke-width="2" />
+                    </svg>
+                    <div class="sub-options">
+                        <div class="slot filled static-yellow">監測農田水質，<br>減少污染源</div>
+                        <div class="slot empty yellow-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                        <div class="slot empty yellow-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="sidebar-title">待選區</div>
+            <div class="items-container" ondrop="drop(event)" ondragover="allowDrop(event)" id="sidebar-container">
+                <div class="draggable-item item-purple" draggable="true" ondragstart="drag(event)" id="p1">維護水質</div>
+                <div class="draggable-item item-purple" draggable="true" ondragstart="drag(event)" id="p2">強化農業韌性</div>
+                <div class="draggable-item item-purple" draggable="true" ondragstart="drag(event)" id="p3">調節水資源</div>
+                
+                <hr style="width: 100%; border: 1px dashed #ccc;">
+
+                <div class="draggable-item item-yellow" draggable="true" ondragstart="drag(event)" id="y1">推廣有機農業，提升土壤健康與生產力</div>
+                <div class="draggable-item item-yellow" draggable="true" ondragstart="drag(event)" id="y2">使用智慧灌溉技術，減少水資源浪費</div>
+                <div class="draggable-item item-yellow" draggable="true" ondragstart="drag(event)" id="y3">減少農業化學污染，降低水源污染風險</div>
+                <div class="draggable-item item-yellow" draggable="true" ondragstart="drag(event)" id="y4">發展混合種植，減少極端天氣風險</div>
+                <div class="draggable-item item-yellow" draggable="true" ondragstart="drag(event)" id="y5">使用天然水生植物來吸收污染</div>
+                <div class="draggable-item item-yellow" draggable="true" ondragstart="drag(event)" id="y6">調整灌溉方式，提高農業用水效率</div>
+            </div>
+
+            <button id="screenshot-btn" onclick="takeScreenshot()">
+                📷 下載實驗截圖
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 記錄被拖曳的物件原本的父層，用於狀態還原
+    let draggedItem = null;
+    let oldParent = null;
+
+    function allowDrop(ev) {
+        ev.preventDefault(); // 允許放置
+        // 視覺回饋：如果拖到可放置區域，顯示可移動游標
+        ev.dataTransfer.dropEffect = "move";
+    }
+
+    function drag(ev) {
+        draggedItem = ev.target;
+        oldParent = ev.target.parentElement;
+        ev.dataTransfer.setData("text", ev.target.id);
+        ev.target.style.opacity = "0.5";
+    }
+
+    document.addEventListener("dragend", function(event) {
+        event.target.style.opacity = "1";
+        // 清除所有 drag-over 樣式
+        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+    });
+
+    // 拖曳進入時的視覺效果
+    document.addEventListener("dragenter", function(event) {
+        let target = event.target;
+        // 如果是 .slot 或者是 items-container
+        if (target.classList.contains("slot") || target.classList.contains("items-container")) {
+            target.classList.add("drag-over");
+        }
+    });
+
+    document.addEventListener("dragleave", function(event) {
+        let target = event.target;
+        if (target.classList.contains("slot") || target.classList.contains("items-container")) {
+            target.classList.remove("drag-over");
+        }
+    });
+
+    function drop(ev) {
+        ev.preventDefault();
+        var data = ev.dataTransfer.getData("text");
+        var draggedElement = document.getElementById(data);
+        
+        // 判斷目標容器
+        var target = ev.target;
+        
+        // 向上尋找，直到找到 slot 或 items-container
+        while (target && !target.classList.contains('slot') && !target.classList.contains('items-container')) {
+            target = target.parentElement;
+        }
+
+        if (!target) return; // 沒找到有效目標
+
+        target.classList.remove('drag-over');
+
+        // 情境 A: 拖回待選區 (Sidebar)
+        if (target.classList.contains('items-container')) {
+            target.appendChild(draggedElement);
+            resetSlotStyle(oldParent); // 重置舊格子的樣式
+            resetItemStyle(draggedElement); // 重置物件樣式(恢復原本的小卡片樣子)
+            return;
+        }
+
+        // 情境 B: 拖入格子 (Slot)
+        if (target.classList.contains('slot')) {
+            // 如果格子已經有東西 (且不是自己)，不允許放入 (或者你可以選擇交換，這裡先簡單處理為不允許覆蓋)
+            if (target.children.length > 0 && target.children[0] !== draggedElement) {
+                // 視覺上給個提示，或者就什麼都不做(彈回原處)
+                return;
+            }
+
+            // 放入新格子
+            target.appendChild(draggedElement);
+            
+            // 處理舊格子：如果它來自另一個 Slot，舊的要變回空白
+            resetSlotStyle(oldParent);
+
+            // 處理新格子：變更為 Filled 狀態
+            target.classList.remove('empty');
+            target.classList.add('filled');
+            
+            // 根據物件類型設定背景色
+            if (draggedElement.classList.contains('item-purple')) {
+                target.style.backgroundColor = "var(--purple-bg)";
+                target.style.borderColor = "var(--purple-border)";
+            } else {
+                target.style.backgroundColor = "var(--yellow-bg)";
+                target.style.borderColor = "var(--yellow-border)";
+            }
+
+            // 修改物件本身的樣式，讓它適應格子大小
+            draggedElement.style.width = "100%";
+            draggedElement.style.height = "100%";
+            draggedElement.style.border = "none";
+            draggedElement.style.background = "transparent";
+            draggedElement.style.boxShadow = "none";
+        }
+    }
+
+    // 輔助函式：還原格子的空白狀態
+    function resetSlotStyle(element) {
+        if (element && element.classList.contains('slot')) {
+            // 檢查是否真的空了 (以防邏輯錯誤)
+            if (element.children.length === 0) {
+                element.classList.add('empty');
+                element.classList.remove('filled');
+                element.style.backgroundColor = ""; // 移除行內樣式，恢復 CSS 預設
+                element.style.borderColor = "";
+            }
+        }
+    }
+
+    // 輔助函式：還原物件在待選區的樣式
+    function resetItemStyle(element) {
+        element.style.width = "90%";
+        element.style.height = ""; // 自動高度
+        element.style.border = "2px solid #000";
+        element.style.boxShadow = "2px 2px 5px rgba(0,0,0,0.1)";
+        if (element.classList.contains('item-purple')) {
+            element.style.backgroundColor = "var(--purple-bg)";
+        } else {
+            element.style.backgroundColor = "var(--yellow-bg)";
+        }
+    }
+
+    function takeScreenshot() {
+        var btn = document.getElementById('screenshot-btn');
+        btn.style.display = 'none'; 
+
+        // 獲取輸入的編號和姓名
+        var inputs = document.querySelectorAll('.info-input');
+        var fileName = '實驗結果';
+        
+        if(inputs[0].value) fileName += '_' + inputs[0].value;
+        if(inputs[1].value) fileName += '_' + inputs[1].value;
+
+        html2canvas(document.querySelector("#app-wrapper"), {
+            scale: 2 
+        }).then(canvas => {
+            btn.style.display = 'block'; 
+            var link = document.createElement('a');
+            link.download = fileName + '.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+    }
+</script>
+
+</body>
+</html>
